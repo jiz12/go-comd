@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 module gocomd
 
 go 1.17
@@ -31,5 +32,14 @@ require (
 
 require (
 	github.com/cpuguy83/go-md2man/v2 v2.0.1 // indirect
+=======
+module github.com/jiz12/go-comd
+
+go 1.16
+
+require (
+	github.com/sirupsen/logrus v1.8.1
+	github.com/spf13/cobra v1.4.0
+>>>>>>> d5b7e3917f557c7bd7c16cae5b192c65f40753dc
 	github.com/spf13/viper v1.11.0
 )
