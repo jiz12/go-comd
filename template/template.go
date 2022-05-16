@@ -2,7 +2,6 @@ package template
 
 import (
 	_ "embed"
-	"errors"
 	"os"
 	"runtime"
 	"strings"
@@ -11,6 +10,11 @@ import (
 //1,选择模板
 //2.从模板中读取内容，并写入到新的文件中
 //3.返回成功
+
+type TemplateFile struct {
+	Content     string
+	DefaultName string
+}
 
 //go:embed mysql/migrate.txt
 var migrateStr string
@@ -23,17 +27,13 @@ const (
 	Config  = "config"
 )
 
-var templates = map[string]string{
-	Migrate: migrateStr,
-	Config:  configStr,
+var Templates = map[string]TemplateFile{
+	Migrate: {Content: migrateStr, DefaultName: "template.go"},
+	Config:  {Content: configStr, DefaultName: "config.yml"},
 }
 
 // LoadContentFromTemplate load content from template and write into the file
-func LoadContentFromTemplate(f *os.File, dir string, template string) error {
-	content, ok := templates[template]
-	if !ok {
-		return errors.New("can't find template")
-	}
+func LoadContentFromTemplate(f *os.File, dir string, content string) error {
 
 	content = replacePackageName(dir, f.Name(), content)
 

@@ -12,6 +12,6 @@ var Cmd = &cobra.Command{
 
 func init() {
 	Cmd.Flags().StringVar(&VarStringDir, "dir", ".", "The dir of the generated file")
-	Cmd.Flags().StringVar(&VarStringFile, "file", "template.go", "The name of the generated file")
+	Cmd.Flags().StringVar(&VarStringFile, "file", "", "The name of the generated file")
 	Cmd.Flags().StringVar(&VarStringTemplate, "template", "migrate", "which template to use")
 }

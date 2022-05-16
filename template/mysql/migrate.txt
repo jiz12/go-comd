@@ -1,7 +1,115 @@
 package %s
 
-import "fmt"
+import (
+	"flag"
+	"gitlab.mvalley.com/common/adam/pkg/client"
+	cfg "gitlab.mvalley.com/common/adam/pkg/config"
+	"gitlab.mvalley.com/rimedata/pevc-businessapp/common/pkg/trealm/pkg/models/mysql"
+	"gorm.io/gorm"
+	gorm_logger "gorm.io/gorm/logger"
+	"log"
+	"os"
+	"strconv"
+	"strings"
+	"time"
+)
 
-func main(){
-	fmt.Println("我是migrate")
+type config struct {
+	TrealmMySQLConfig cfg.MySQLConfiguration
 }
+
+var c *config
+var trealmDB *gorm.DB
+
+var configFileName = flag.String("cfn", "config", "name of configs file")
+var configFilePath = flag.String("cfp", "./configs/", "path of configs file")
+
+func init() {
+	flag.Parse()
+	err := InitConfig(*configFileName, strings.Split(*configFilePath, ","))
+	if err != nil {
+		panic(err)
+	}
+
+	trealmDB, err = client.InitMySQL(c.TrealmMySQLConfig)
+	if err != nil {
+		panic(err)
+	}
+	if c.TrealmMySQLConfig.LogMode == cfg.Console {
+		trealmDB.Logger = gorm_logger.New(
+			log.New(os.Stdout, "\r\nMYSQL:", log.LstdFlags|log.Llongfile),
+			gorm_logger.Config{
+				SlowThreshold: 100 * time.Millisecond,
+				Colorful:      true,
+				LogLevel:      gorm_logger.Info,
+			},
+		)
+	}
+}
+
+func InitConfig(configName string, configPaths []string) error {
+	c = new(config)
+	c.TrealmMySQLConfig = cfg.MySQLConfiguration{
+		Host:     "120.76.230.112",
+		User:     "root",
+		Password: "root2020",
+		DBName:   "tab",
+		Port:     "3306",
+		LogMode:  "console",
+	}
+	return nil
+	//return cfg.InitConfiguration(configName, configPaths, c)
+}
+
+func main() {
+
+	//1.迁移表结构
+	err := trealmDB.AutoMigrate(
+		&mysql.TabBase{},
+		&mysql.TeamSelectTab{},
+	)
+	if err != nil {
+		panic(err)
+	}
+
+	//2.加外键
+	baseTableName := mysql.TabBase{}.TableName()
+	teamSelectTableName := mysql.TeamSelectTab{}.TableName()
+	AddUnionForeignKey(trealmDB, teamSelectTableName, []string{"tab_id"}, baseTableName, []string{"rec_id"}, true, "")
+
+	//3.迁移数据
+	err = trealmDB.Exec(sql).Error
+	if err != nil {
+		panic(err)
+	}
+}
+
+func AddUnionForeignKey(db *gorm.DB, ownTable string, colName []string, dependentTable string, dependentColName []string, isCascade bool, fkName string) {
+	if len(colName) <= 0 {
+		return
+	}
+	if fkName == "" {
+		fkName = "fk_" + colName[0] + "_" + strconv.Itoa(int(time.Now().UnixNano()))
+	}
+	sqlExec := "ALTER TABLE " + ownTable + " ADD CONSTRAINT " + fkName + " FOREIGN KEY(" + strings.Join(colName, ",") + ") REFERENCES " +
+		dependentTable + "(" + strings.Join(dependentColName, ",") + ")"
+	if isCascade {
+		sqlExec += " ON UPDATE CASCADE ON DELETE CASCADE"
+	}
+	err := db.Exec(sqlExec).Error
+	if err != nil {
+		panic(err)
+	}
+}
+
+var sql = `INSERT INTO tab_bases(rec_id, created_at, sheet_id, name, description, sequence, type, icon, default_display, suggestion_id)
+VALUES('017e35d5-de4b-41f7-b6f0-70caa88c5622', now(),  'trealm.portfolio_company_subcompany', '项目子公司', '项目子公司应用开启后，即可一站式获取项目的全部参股、控股、全资子公司信息，满足您对项目运营和监管的不同使用需求。', 6, 'derived', 'https://rimedata.com:9998/resource/get/trealm_sheet_icon_portfolio_company_subcompany', 0, 'ba_qksh.suggestion.enterprise'),
+('07d6ed51-ef84-4a38-bfe0-e3270fa283c4', now(),  'trealm.lp', 'LP', '根据需要启用 LP 应用，即可查看机构主体出资方的全部信息。', 5, 'derived', 'https://rimedata.com:9998/resource/get/trealm_sheet_icon_lp', 1, 'ba_qksh.suggestion.enterprise'),
+('22385c73-d773-4d93-b348-a9110831eb5b', now(),  'trealm.committed_fund_portfolio_company_subcompany', '子基金项目子公司', '子基金项目子公司应用开启后，即可一站式获取项目的全部参股、控股、全资子公司信息，满足您返投统计和条款监管等不同场景的使用需求。', 7, 'derived', 'https://rimedata.com:9998/resource/get/trealm_sheet_icon_committed_fund_portfolio_company_subcompany', 0, 'ba_qksh.suggestion.enterprise'),
+('62c6e123-e8c9-4fe2-9ea6-98fed8ff27ca', now(),  'trealm.three_level_expanded_committed_fund_portfolio_company', '三级放大项目', '三层放大项目应用依据您子基金应用中的实体，为您多层穿透计算出三级放大的全部项目，方便您对末端节点进行宏观把控。', 9, 'derived', 'https://rimedata.com:9998/resource/get/trealm_sheet_icon_three_level_committed_fund_portfolio_company', 0, 'ba_qksh.suggestion.enterprise'),
+('84c8b142-cd6c-4a1f-bee2-6cc3aefc8650', now(),  'trealm.committed_fund_portfolio_company', '子基金项目', '您可以用子基金项目应用管理您机构子基金投资的全部项目，提取子基金项目的数据指标，减少子基金填报需求。这些项目也会自动同步到投后追踪，您还可以在投后追踪中监控项目的动态。', 4, 'basic', 'https://rimedata.com:9998/resource/get/trealm_sheet_icon_committed_fund_portfolio_company', 1, 'ba_qksh.suggestion.enterprise'),
+('bf2cfa66-36f4-4a1c-b1ca-36c4797b6612', now(),  'trealm.committed_fund', '子基金', '通过在子基金应用中完善您机构投资的子基金，系统会自动为您获取并更新更全面的子基金项目数据。', 3, 'basic', 'https://rimedata.com:9998/resource/get/trealm_sheet_icon_committed_fund', 1, 'ba_qksh.suggestion.enterprise'),
+('d25ff3b8-55d4-4620-8473-a5afe0fed7bb', now(),  'trealm.main_part', '主体', '通过在主体应用中列明机构的全部实体公司，您可以从源头划清机构范围，获得更精确的数据更新推送。', 1, 'basic', 'https://rimedata.com:9998/resource/get/trealm_sheet_icon_main_part', 1, 'ba_qksh.suggestion.organization'),
+('d6d0903c-191d-48de-a5d0-9fa57879e2e0', now(),  'trealm.three_level_expanded_committed_fund', '三级放大基金', '三层放大基金应用依据您子基金应用中的实体，为您多层穿透计算出三级放大的全部基金，方便您对中间节点进行宏观把控。', 8, 'derived', 'https://rimedata.com:9998/resource/get/trealm_sheet_icon_three_level_committed_fund', 0, 'ba_qksh.suggestion.enterprise'),
+('f98f9dc7-4685-4bd1-8ecc-cf23e9e6f460', now(),  'trealm.portfolio_company', '项目', '您可以用项目应用管理您机构投资的全部项目，筛选、查看、编辑、导出项目相关数据。这些项目也会自动同步到投后追踪，您还可以在投后追踪中监控项目的动态。', 2, 'basic', 'https://rimedata.com:9998/resource/get/trealm_sheet_icon_portfolio_company', 1, 'ba_qksh.suggestion.enterprise');
+`

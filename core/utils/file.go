@@ -10,7 +10,7 @@ import (
 func CreateFileIfNotExist(dir string, file string) (*os.File, error) {
 	_, err := os.Stat(dir)
 	if os.IsNotExist(err) {
-		err = os.Mkdir(dir, os.ModeDir)
+		err = os.Mkdir(dir, os.ModePerm)
 	}
 	if err != nil {
 		return nil, err

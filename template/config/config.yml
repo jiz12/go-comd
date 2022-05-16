@@ -1,1 +1,102 @@
-level:path
+MySQLConfig:
+  TrealmMySQLConfig:
+    Host: 10.20.70.21
+    User: trealm_user
+    Password: CifxnIeCE3KLMxODxG
+    DBName: trealm
+    Port: 3306
+    # *** MUST NOT BE `true` IN PRODUCT ENVIRONMENT ***
+    LogMode: console
+  PevcMySQLConfig:
+    Host: 10.20.70.24
+    User: prod_da_pevc_user1
+    Password: WeAQwrgU1l06rig4TlU9cCmg
+    DBName: prod_da_pevc
+    Port: 3306
+    LogMode: console
+  SmMySQLConfig:
+    Host: 10.20.70.24
+    User: prod_da_sm_user
+    Password: CVeGPhobPqdPbJ3EfQhlzWwA
+    DBName: prod_da_sm
+    Port: 3306
+    LogMode: console
+
+RedisConfig:
+  Host: 10.20.70.23
+  Port: 6381
+
+ESConfig:
+  TrealmESConfig:
+    Host: https://10.20.70.22:9200
+    User: elastic
+    Password: pacman
+    ResponseHeaderTimeoutSeconds: 30
+
+ESIndexConfig:
+  PortfolioCompanyIndex: trealm_portfolio_company_test_1103
+  FundIndex: trealm_fund_test_1103
+  CommittedFundIndex: trealm_commited_fund_test
+  CommittedFundPortfolioCompanyIndex: trealm_committed_fund_portfolio_company_test
+  LPIndex: trealm_lp_test
+  FundManagerIndex: trealm_fund_managers_test
+  FundOfFundIndex: trealm_fund_of_fund_test
+
+KafkaConfig:
+  KafkaHost:
+    Brokers: 10.20.70.22:9095,10.20.70.22:9096,10.20.70.22:9097
+
+KafkaTopicConfig:
+  PushData: push_data_test
+
+MongoDBConfig:
+  TrealmMongoDBConfig:
+    Host: mongodb://test_adsh_user:nF00P9MwF9I34Qnjz8sw51pb@10.20.70.22:27017/test_adsh
+    DBName: test_adsh
+  SAICMongoDBConfig:
+    Host: mongodb://root:TqYa6KVVT7oK2dBuLX2IWJet7REYNOmu@10.20.70.36:27017/?connect=direct;slaveOk=true
+    DBName: prod_da_saic
+
+MongoDBCollectionConfig:
+  PortfolioCompanyCollection: trealm_portfolio_company_test
+  FundManagerCollection: trealm_fund_manager_test
+  FundCollection: trealm_fund_test
+  MatchResultCollection: match_result
+  FundOfFundCollection: trealm_fund_of_fund_test
+  CommittedFundPortfolioCompanyCollection: trealm_committed_fund_portfolio_company_test
+  CommittedFundCollection: trealm_committed_fund_test
+  LPCollection: trealm_lp_test
+  ChinaSAICDerivedShareholder: china_saic_derived_shareholder
+
+LoggerConfig:
+  Level: trace
+  Filename: /var/log/ba_webtrealm.log
+  Stdout: true
+  MaxSize: 200
+  MaxBackups: 3
+
+ResourcePrefix: http://180.96.8.140:9998/v2/resource/get/
+
+LogoURIPrefix:
+
+ExcelModelConfig:
+  EntityColumnHeads:
+    - 公司全称/统一社会信用代码
+  MaxEntityRecordsNum: 10000
+  RelationColumnHeads:
+    - 项目名称/统一社会信用代码
+    - 参股基金名称/统一社会信用代码
+  MaxRelationRecordsNum: 10000
+  DismatchFileName: 问题数据.xlsx
+  SheetName: Sheet1
+  RelationTemplateResource: 2db8c516-ae38-4293-9ffa-3c11280a3133
+  EntityTemplateResource: b39f5f5f-ea0c-4a89-bd69-8c323444b0a9
+
+NebulaConfig:
+  Address:
+    - Host: 10.20.70.29
+      Port: 9669
+  User: root
+  Password: nebula
+  Space: trealm_shareholder
+  Debug: true
