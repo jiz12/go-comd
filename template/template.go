@@ -22,14 +22,19 @@ var migrateStr string
 //go:embed config/config.yml
 var configStr string
 
+//go:embed shortcut/shortcut.txt
+var shortcutStr string
+
 const (
-	Migrate = "migrate"
-	Config  = "config"
+	Migrate  = "migrate"
+	Config   = "config"
+	ShortCut = "shortcut"
 )
 
 var Templates = map[string]TemplateFile{
-	Migrate: {Content: migrateStr, DefaultName: "template.go"},
-	Config:  {Content: configStr, DefaultName: "config.yml"},
+	Migrate:  {Content: migrateStr, DefaultName: "template.go"},
+	Config:   {Content: configStr, DefaultName: "config.yml"},
+	ShortCut: {Content: shortcutStr, DefaultName: "shortcut.txt"},
 }
 
 // LoadContentFromTemplate load content from template and write into the file

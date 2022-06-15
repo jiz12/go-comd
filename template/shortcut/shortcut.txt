@@ -1,0 +1,10 @@
+1、Alt+9 打开git
+2、Ctrl+B / Ctrl+click 查看方法、结构体等，再次输入会跳回原来的地方
+3、Ctrl +/- 展开/隐藏当前行代码
+4、Alt + left/right 左右切换试图
+5、Ctrl + E 最近打开过的文件
+6、Ctrl + up/down 上下切换方法
+
+
+
+
